@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Attendance - Attachee Management System</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="../assets/css/styles.css">
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand"><i class="fas fa-user-graduate"></i><h2>Student Portal</h2><small>Kisii County - Water & Energy</small></div>
+      <nav class="sidebar-nav">
+        <div class="nav-section">Main</div>
+        <a href="student-dashboard.html"><i class="fas fa-chart-pie"></i> My Dashboard</a>
+        <div class="nav-section">My Activities</div>
+        <a href="student-attendance.html" class="active"><i class="fas fa-clipboard-check"></i> My Attendance</a>
+        <a href="student-logbook.html"><i class="fas fa-book"></i> My Logbook</a>
+        <a href="student-evaluations.html"><i class="fas fa-star"></i> My Evaluations</a>
+        <div class="nav-section">Account</div>
+        <a href="student-profile.html"><i class="fas fa-user-circle"></i> My Profile</a>
+        <a href="#" onclick="Auth.logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+      </nav>
+    </aside>
+    <main class="main-content">
+      <header class="header">
+        <div class="header-left"><button class="toggle-sidebar" onclick="document.getElementById('sidebar').classList.toggle('open')"><i class="fas fa-bars"></i></button><h1>My Attendance</h1></div>
+        <div class="header-right"><div class="user-info"><div class="user-avatar" id="userAvatar">S</div><div><div class="user-name" id="userName">Student</div><div class="user-role" id="userRole">Attachee</div></div></div></div>
+      </header>
+      <div class="page-content">
+        <div class="card">
+          <div class="card-header"><h3>Attendance Records</h3></div>
+          <div class="card-body">
+            <div class="table-container">
+              <table>
+                <thead><tr><th>Date</th><th>Check In</th><th>Check Out</th><th>Status</th><th>Remarks</th></tr></thead>
+                <tbody id="attendanceBody"><tr><td colspan="5" class="text-center">Loading...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!Auth.isLoggedIn()) { window.location.href = 'login.html'; return; }
+      Auth.updateHeaderUser();
+      const user = Auth.getUser();
+      if (!user) return;
+      try {
+        const attRes = await API.getAttachees({ search: user.email });
+        const attachees = attRes.data || [];
+        const attachee = attachees.length > 0 ? attachees[0] : null;
+        if (!attachee) { document.getElementById('attendanceBody').innerHTML = '<tr><td colspan="5" class="text-center">No attachment record found</td></tr>'; return; }
+        const attResp = await API.getAttendance({ attachee: attachee._id });
+        const records = attResp.data || [];
+        const tbody = document.getElementById('attendanceBody');
+        if (records.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="text-center">No attendance records</td></tr>'; return; }
+        tbody.innerHTML = records.map(r => `
+          <tr>
+            <td>${new Date(r.date).toLocaleDateString()}</td>
+            <td>${new Date(r.checkIn).toLocaleTimeString()}</td>
+            <td>${r.checkOut ? new Date(r.checkOut).toLocaleTimeString() : '-'}</td>
+            <td><span class="badge badge-${r.status === 'present' ? 'success' : r.status === 'absent' ? 'danger' : 'warning'}">${r.status}</span></td>
+            <td>${r.remarks || '-'}</td>
+          </tr>
+        `).join('');
+      } catch(e) { console.error(e); document.getElementById('attendanceBody').innerHTML = '<tr><td colspan="5" class="text-center">Error loading data</td></tr>'; }
+    });
+  </script>
+</body>
+</html>

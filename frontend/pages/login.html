@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Attachee Management System</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="../assets/css/styles.css">
+</head>
+<body>
+  <div class="login-page">
+    <div class="login-card">
+      <div class="login-logo">
+        <i class="fas fa-users-gear"></i>
+        <h1>Attachee Management System</h1>
+        <p>Department of Water, Energy, Environment & Natural Resources</p>
+        <small>Kisii County Government</small>
+      </div>
+
+      <div id="loginError" class="alert alert-danger" style="display: none;"></div>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" class="form-control" placeholder="Enter your email" required>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" class="form-control" placeholder="Enter your password" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">
+          <i class="fas fa-sign-in-alt"></i> Sign In
+        </button>
+      </form>
+
+      <div class="text-center mt-2">
+        <p style="color: var(--gray-600); font-size: 14px;">
+          New student? <a href="student-register.html" style="color: #1a73e8; font-weight: 500;">Register here</a>
+        </p>
+        <p style="color: var(--gray-500); font-size: 13px; margin-top: 10px;">
+          <i class="fas fa-shield-alt"></i> Secure login for authorized personnel only
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Evaluations - Attachee Management System</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="../assets/css/styles.css">
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <i class="fas fa-users-gear"></i>
+        <h2>Attachee MS</h2>
+        <small>Kisii County - Water & Energy</small>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section">Main</div>
+        <a href="dashboard.html"><i class="fas fa-chart-pie"></i> Dashboard</a>
+        <div class="nav-section">Management</div>
+        <a href="attachees.html"><i class="fas fa-users"></i> Attachees</a>
+        <a href="register-attachee.html"><i class="fas fa-user-plus"></i> Register Attachee</a>
+        <a href="supervisors.html"><i class="fas fa-chalkboard-user"></i> Supervisors</a>
+        <a href="departments.html"><i class="fas fa-building"></i> Departments</a>
+        <div class="nav-section">Tracking</div>
+        <a href="evaluations.html" class="active"><i class="fas fa-star"></i> Evaluations</a>
+        <div class="nav-section">Reports</div>
+        <a href="reports.html"><i class="fas fa-file-alt"></i> Reports</a>
+        <div class="nav-section">Account</div>
+        <a href="profile.html"><i class="fas fa-user-circle"></i> Profile</a>
+        <a href="#" onclick="Auth.logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+      </nav>
+    </aside>
+    <main class="main-content">
+      <header class="header">
+        <div class="header-left">
+          <button class="toggle-sidebar" onclick="document.getElementById('sidebar').classList.toggle('open')"><i class="fas fa-bars"></i></button>
+          <h1>Evaluations</h1>
+        </div>
+        <div class="header-right">
+          <div class="user-info" onclick="window.location.href='profile.html'">
+            <div class="user-avatar" id="userAvatar">A</div>
+            <div>
+              <div class="user-name" id="userName">Admin</div>
+              <div class="user-role" id="userRole">Administrator</div>
+            </div>
+          </div>
+        </div>
+      </header>
+      <div class="page-content">
+        <div class="page-header">
+          <h2>Evaluation Management</h2>
+          <div class="header-actions">
+            <button class="btn btn-primary" onclick="openModal('evaluationModal')"><i class="fas fa-plus"></i> New Evaluation</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Attachee</th>
+                    <th>Type</th>
+                    <th>Date</th>
+                    <th>Score</th>
+                    <th>Grade</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="evaluationsBody">
+                  <tr><td colspan="7" class="text-center">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="evaluationModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>New Evaluation</h3>
+        <button class="modal-close" onclick="closeModal('evaluationModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="evaluationForm">
+          <div class="form-group">
+            <label>Attachee *</label>
+            <select id="evalAttachee" class="form-select" required><option value="">Select Attachee</option></select>
+          </div>
+          <div class="form-group">
+            <label>Evaluation Type *</label>
+            <select id="evalType" class="form-select" required>
+              <option value="mid-term">Mid-Term</option>
+              <option value="final">Final</option>
+            </select>
+          </div>
+          <h4>Performance Criteria (1-5)</h4>
+          <div class="form-row">
+            <div class="form-group"><label>Punctuality</label><input type="number" id="punctuality" class="form-control" min="1" max="5" value="3" required></div>
+            <div class="form-group"><label>Attendance</label><input type="number" id="attendance" class="form-control" min="1" max="5" value="3" required></div>
+            <div class="form-group"><label>Attitude</label><input type="number" id="attitude" class="form-control" min="1" max="5" value="3" required></div>
+            <div class="form-group"><label>Initiative</label><input type="number" id="initiative" class="form-control" min="1" max="5" value="3" required></div>
+            <div class="form-group"><label>Quality of Work</label><input type="number" id="qualityOfWork" class="form-control" min="1" max="5" value="3" required></div>
+            <div class="form-group"><label>Technical Skills</label><input type="number" id="technicalSkills" class="form-control" min="1" max="5" value="3" required></div>
+            <div class="form-group"><label>Communication</label><input type="number" id="communication" class="form-control" min="1" max="5" value="3" required></div>
+            <div class="form-group"><label>Teamwork</label><input type="number" id="teamwork" class="form-control" min="1" max="5" value="3" required></div>
+            <div class="form-group"><label>Problem Solving</label><input type="number" id="problemSolving" class="form-control" min="1" max="5" value="3" required></div>
+            <div class="form-group"><label>Adaptability</label><input type="number" id="adaptability" class="form-control" min="1" max="5" value="3" required></div>
+          </div>
+          <div class="form-group"><label>Supervisor Remarks</label><textarea id="supervisorRemarks" class="form-control" rows="3"></textarea></div>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Submit Evaluation</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  <script>
+    async function loadEvaluations() {
+      try {
+        const response = await API.getEvaluations();
+        const evals = response.data;
+        const tbody = document.getElementById('evaluationsBody');
+        if (!evals || evals.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" class="text-center">No evaluations found</td></tr>';
+          return;
+        }
+        tbody.innerHTML = evals.map(e => `
+          <tr>
+            <td>${e.attachee ? e.attachee.firstName + ' ' + e.attachee.lastName : 'N/A'}</td>
+            <td><span class="badge badge-info">${e.evaluationType}</span></td>
+            <td>${new Date(e.evaluationDate).toLocaleDateString()}</td>
+            <td>${e.averageScore || '-'}</td>
+            <td><strong>${e.grade || '-'}</strong></td>
+            <td><span class="badge badge-${e.status === 'approved' ? 'success' : e.status === 'submitted' ? 'info' : 'warning'}">${e.status}</span></td>
+            <td><button class="btn btn-sm btn-secondary" onclick="alert('Score: ${e.averageScore}\\nGrade: ${e.grade}\\nRemarks: ${e.supervisorRemarks || 'N/A'}')"><i class="fas fa-eye"></i></button></td>
+          </tr>
+        `).join('');
+      } catch (error) { console.error(error); }
+    }
+
+    async function loadAttacheeSelect() {
+      try {
+        const response = await API.getAttachees({ limit: 100 });
+        const select = document.getElementById('evalAttachee');
+        select.innerHTML = '<option value="">Select Attachee</option>' + 
+          (response.data || []).map(a => `<option value="${a._id}">${a.firstName} ${a.lastName} - ${a.studentId}</option>`).join('');
+      } catch (error) { console.error(error); }
+    }
+
+    document.getElementById('evaluationForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = {
+        attachee: document.getElementById('evalAttachee').value,
+        evaluationType: document.getElementById('evalType').value,
+        punctuality: parseInt(document.getElementById('punctuality').value),
+        attendance: parseInt(document.getElementById('attendance').value),
+        attitude: parseInt(document.getElementById('attitude').value),
+        initiative: parseInt(document.getElementById('initiative').value),
+        qualityOfWork: parseInt(document.getElementById('qualityOfWork').value),
+        technicalSkills: parseInt(document.getElementById('technicalSkills').value),
+        communication: parseInt(document.getElementById('communication').value),
+        teamwork: parseInt(document.getElementById('teamwork').value),
+        problemSolving: parseInt(document.getElementById('problemSolving').value),
+        adaptability: parseInt(document.getElementById('adaptability').value),
+        supervisorRemarks: document.getElementById('supervisorRemarks').value,
+      };
+      try {
+        await API.createEvaluation(data);
+        closeModal('evaluationModal');
+        loadEvaluations();
+        alert('Evaluation submitted successfully!');
+      } catch (error) { alert('Error: ' + error.message); }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => { loadEvaluations(); loadAttacheeSelect(); });
+  </script>
+</body>
+</html>

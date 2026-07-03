@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reports - Attachee Management System</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="../assets/css/styles.css">
+  <style>
+    .report-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .report-table th { background: #f8f9fa; padding: 10px 12px; text-align: left; font-weight: 600; border-bottom: 2px solid #dee2e6; }
+    .report-table td { padding: 8px 12px; border-bottom: 1px solid #eee; }
+    .report-table tr:hover { background: #f5f5f5; }
+    .report-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
+    .report-summary-item { background: #e8f0fe; padding: 12px 16px; border-radius: 8px; text-align: center; }
+    .report-summary-item h4 { font-size: 22px; color: #1a73e8; margin: 0; }
+    .report-summary-item p { font-size: 12px; color: #5f6368; margin: 4px 0 0; }
+    .report-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #1a73e8; }
+    .report-header h3 { margin: 0; color: #1a73e8; font-size: 16px; }
+    .report-header small { color: #5f6368; }
+    .print-btn { position: fixed; bottom: 20px; right: 20px; z-index: 100; }
+    @media print { .sidebar, .header, .page-header, .print-btn, .stats-grid { display: none !important; } }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand"><i class="fas fa-users-gear"></i><h2>Attachee MS</h2><small>Kisii County - Water & Energy</small></div>
+      <nav class="sidebar-nav">
+        <div class="nav-section">Main</div>
+        <a href="dashboard.html"><i class="fas fa-chart-pie"></i> Dashboard</a>
+        <div class="nav-section">Management</div>
+        <a href="attachees.html"><i class="fas fa-users"></i> Attachees</a>
+        <a href="register-attachee.html"><i class="fas fa-user-plus"></i> Register Attachee</a>
+        <a href="supervisors.html"><i class="fas fa-chalkboard-user"></i> Supervisors</a>
+        <a href="departments.html"><i class="fas fa-building"></i> Departments</a>
+        <div class="nav-section">Tracking</div>
+        <a href="evaluations.html"><i class="fas fa-star"></i> Evaluations</a>
+        <div class="nav-section">Reports</div>
+        <a href="reports.html" class="active"><i class="fas fa-file-alt"></i> Reports</a>
+        <div class="nav-section">Account</div>
+        <a href="profile.html"><i class="fas fa-user-circle"></i> Profile</a>
+        <a href="#" onclick="Auth.logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+      </nav>
+    </aside>
+    <main class="main-content">
+      <header class="header">
+        <div class="header-left"><button class="toggle-sidebar" onclick="document.getElementById('sidebar').classList.toggle('open')"><i class="fas fa-bars"></i></button><h1>Reports</h1></div>
+        <div class="header-right"><div class="user-info" onclick="window.location.href='profile.html'"><div class="user-avatar" id="userAvatar">A</div><div><div class="user-name" id="userName">Admin</div><div class="user-role" id="userRole">Administrator</div></div></div></div>
+      </header>
+      <div class="page-content">
+        <div class="page-header"><h2>Generate Reports</h2></div>
+        <div class="stats-grid">
+          <div class="stat-card" onclick="generateReport('active-attachees')" style="cursor:pointer;">
+            <div class="stat-icon green"><i class="fas fa-users"></i></div>
+            <div class="stat-info"><h3>Active Attachees</h3><p>Currently active attachees</p></div>
+          </div>
+          <div class="stat-card" onclick="generateReport('attendance')" style="cursor:pointer;">
+            <div class="stat-icon blue"><i class="fas fa-clipboard-check"></i></div>
+            <div class="stat-info"><h3>Attendance Record</h3><p>Attendance by date range</p></div>
+          </div>
+          <div class="stat-card" onclick="generateReport('evaluations')" style="cursor:pointer;">
+            <div class="stat-icon yellow"><i class="fas fa-star"></i></div>
+            <div class="stat-info"><h3>Evaluation Summary</h3><p>Performance scores & grades</p></div>
+          </div>
+          <div class="stat-card" onclick="generateReport('departmental-placement')" style="cursor:pointer;">
+            <div class="stat-icon blue"><i class="fas fa-building"></i></div>
+            <div class="stat-info"><h3>Department Placement</h3><p>Attachees by department</p></div>
+          </div>
+          <div class="stat-card" onclick="generateReport('completion')" style="cursor:pointer;">
+            <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-info"><h3>Completion Report</h3><p>Completed attachments</p></div>
+          </div>
+          <div class="stat-card" onclick="generateReport('supervisor-workload')" style="cursor:pointer;">
+            <div class="stat-icon red"><i class="fas fa-chalkboard-user"></i></div>
+            <div class="stat-info"><h3>Supervisor Workload</h3><p>Supervisor assignments</p></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Report Output</h3></div>
+          <div class="card-body" id="reportOutput">
+            <div class="empty-state">
+              <i class="fas fa-file-alt"></i>
+              <h3>Select a report type</h3>
+              <p>Click on any report card above to view the formatted report</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <button class="btn btn-primary print-btn" onclick="window.print()" id="printBtn" style="display:none;"><i class="fas fa-print"></i> Print</button>
+
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  <script>
+    // Render functions for each report type
+    const renderers = {
+      'active-attachees': (data) => {
+        const summary = data.summary || {};
+        let html = `<div class="report-header"><h3><i class="fas fa-users"></i> Active Attachees Report</h3><small>Generated: ${new Date(data.generatedAt).toLocaleString()}</small></div>`;
+        
+        html += `<div class="report-summary">
+          <div class="report-summary-item"><h4>${summary.totalActive || 0}</h4><p>Total Active Attachees</p></div>
+          <div class="report-summary-item"><h4>${Object.keys(summary.byDepartment || {}).length}</h4><p>Departments Covered</p></div>
+        </div>`;
+
+        if (summary.byDepartment) {
+          html += `<h4>By Department</h4><table class="report-table"><thead><tr><th>Department</th><th>Count</th></tr></thead><tbody>`;
+          Object.entries(summary.byDepartment).forEach(([dept, count]) => {
+            html += `<tr><td>${dept}</td><td><strong>${count}</strong></td></tr>`;
+          });
+          html += `</tbody></table>`;
+        }
+
+        const list = data.attachees || [];
+        if (list.length) {
+          html += `<h4 class="mt-2">Attachee List</h4><table class="report-table"><thead><tr><th>Name</th><th>Institution</th><th>Course</th><th>Department</th><th>Supervisor</th><th>Start Date</th><th>End Date</th></tr></thead><tbody>`;
+          list.forEach(a => {
+            html += `<tr><td>${a.firstName} ${a.lastName}</td><td>${a.institution}</td><td>${a.course}</td><td>${a.department?.name || '-'}</td><td>${a.supervisor?.name || '-'}</td><td>${new Date(a.attachmentStartDate).toLocaleDateString()}</td><td>${new Date(a.attachmentEndDate).toLocaleDateString()}</td></tr>`;
+          });
+          html += `</tbody></table>`;
+        }
+        return html;
+      },
+
+      'attendance': (data) => {
+        const summary = data.summary || {};
+        let html = `<div class="report-header"><h3><i class="fas fa-clipboard-check"></i> Attendance Report</h3><small>Generated: ${new Date(data.generatedAt).toLocaleString()}</small></div>`;
+        
+        html += `<div class="report-summary">
+          <div class="report-summary-item"><h4>${summary.total || 0}</h4><p>Total Records</p></div>
+          <div class="report-summary-item" style="background:#e6f4ea;"><h4>${summary.present || 0}</h4><p>Present</p></div>
+          <div class="report-summary-item" style="background:#fce8e6;"><h4>${summary.absent || 0}</h4><p>Absent</p></div>
+          <div class="report-summary-item" style="background:#fef7e0;"><h4>${summary.late || 0}</h4><p>Late</p></div>
+        </div>`;
+
+        const records = data.records || [];
+        if (records.length) {
+          html += `<table class="report-table"><thead><tr><th>Attachee</th><th>Date</th><th>Check In</th><th>Check Out</th><th>Status</th></tr></thead><tbody>`;
+          records.slice(0, 50).forEach(r => {
+            html += `<tr><td>${r.attachee ? r.attachee.firstName + ' ' + r.attachee.lastName : 'N/A'}</td><td>${new Date(r.date).toLocaleDateString()}</td><td>${new Date(r.checkIn).toLocaleTimeString()}</td><td>${r.checkOut ? new Date(r.checkOut).toLocaleTimeString() : '-'}</td><td><span class="badge badge-${r.status === 'present' ? 'success' : r.status === 'absent' ? 'danger' : 'warning'}">${r.status}</span></td></tr>`;
+          });
+          html += `</tbody></table>`;
+          if (records.length > 50) html += `<p class="text-center" style="color:#666;">Showing 50 of ${records.length} records</p>`;
+        }
+        return html;
+      },
+
+      'evaluations': (data) => {
+        const summary = data.summary || {};
+        let html = `<div class="report-header"><h3><i class="fas fa-star"></i> Evaluation Report</h3><small>Generated: ${new Date(data.generatedAt).toLocaleString()}</small></div>`;
+        
+        html += `<div class="report-summary">
+          <div class="report-summary-item"><h4>${summary.total || 0}</h4><p>Total Evaluations</p></div>
+          <div class="report-summary-item" style="background:#e6f4ea;"><h4>${summary.averageScore || 'N/A'}</h4><p>Average Score /5</p></div>
+        </div>`;
+
+        if (summary.byGrade) {
+          html += `<h4>Grade Distribution</h4><table class="report-table"><thead><tr><th>Grade</th><th>Count</th></tr></thead><tbody>`;
+          Object.entries(summary.byGrade).forEach(([grade, count]) => {
+            html += `<tr><td><strong>${grade}</strong></td><td>${count}</td></tr>`;
+          });
+          html += `</tbody></table>`;
+        }
+
+        const evals = data.evaluations || [];
+        if (evals.length) {
+          html += `<h4 class="mt-2">Evaluation Details</h4><table class="report-table"><thead><tr><th>Attachee</th><th>Type</th><th>Score</th><th>Grade</th></tr></thead><tbody>`;
+          evals.forEach(e => {
+            html += `<tr><td>${e.attachee ? e.attachee.firstName + ' ' + e.attachee.lastName : 'N/A'}</td><td><span class="badge badge-info">${e.evaluationType}</span></td><td><strong>${e.averageScore || '-'}/5.0</strong></td><td><h3 style="margin:0;">${e.grade || '-'}</h3></td></tr>`;
+          });
+          html += `</tbody></table>`;
+        }
+        return html;
+      },
+
+      'departmental-placement': (data) => {
+        let html = `<div class="report-header"><h3><i class="fas fa-building"></i> Departmental Placement Report</h3><small>Generated: ${new Date(data.generatedAt).toLocaleString()}</small></div>`;
+        
+        const summary = data.summary || {};
+        html += `<div class="report-summary">
+          <div class="report-summary-item"><h4>${summary.totalDepartments || 0}</h4><p>Departments</p></div>
+          <div class="report-summary-item"><h4>${summary.totalAll || 0}</h4><p>Total Attachees</p></div>
+          <div class="report-summary-item" style="background:#e6f4ea;"><h4>${summary.totalActive || 0}</h4><p>Active</p></div>
+        </div>`;
+
+        const depts = data.departments || [];
+        if (depts.length) {
+          html += `<table class="report-table"><thead><tr><th>Department</th><th>Code</th><th>Total</th><th>Active</th><th>Completed</th></tr></thead><tbody>`;
+          depts.forEach(d => {
+            html += `<tr><td><strong>${d.department}</strong></td><td><span class="badge badge-info">${d.code || ''}</span></td><td>${d.total}</td><td>${d.active}</td><td>${d.completed}</td></tr>`;
+          });
+          html += `</tbody></table>`;
+        }
+        return html;
+      },
+
+      'completion': (data) => {
+        const summary = data.summary || {};
+        let html = `<div class="report-header"><h3><i class="fas fa-check-circle"></i> Attachment Completion Report</h3><small>Generated: ${new Date(data.generatedAt).toLocaleString()}</small></div>`;
+        
+        html += `<div class="report-summary">
+          <div class="report-summary-item" style="background:#e6f4ea;"><h4>${summary.totalCompleted || 0}</h4><p>Completed Attachments</p></div>
+          <div class="report-summary-item"><h4>${Object.keys(summary.byDepartment || {}).length}</h4><p>Departments</p></div>
+        </div>`;
+
+        if (summary.byDepartment) {
+          html += `<h4>By Department</h4><table class="report-table"><thead><tr><th>Department</th><th>Completed</th></tr></thead><tbody>`;
+          Object.entries(summary.byDepartment).forEach(([dept, count]) => {
+            html += `<tr><td>${dept}</td><td><strong>${count}</strong></td></tr>`;
+          });
+          html += `</tbody></table>`;
+        }
+
+        const completed = data.completed || [];
+        if (completed.length) {
+          html += `<h4 class="mt-2">Completed Attachees</h4><table class="report-table"><thead><tr><th>Name</th><th>Institution</th><th>Department</th><th>Supervisor</th><th>Period</th></tr></thead><tbody>`;
+          completed.forEach(a => {
+            html += `<tr><td>${a.firstName} ${a.lastName}</td><td>${a.institution}</td><td>${a.department?.name || '-'}</td><td>${a.supervisor?.name || '-'}</td><td>${new Date(a.attachmentStartDate).toLocaleDateString()} - ${new Date(a.attachmentEndDate).toLocaleDateString()}</td></tr>`;
+          });
+          html += `</tbody></table>`;
+        }
+        return html;
+      },
+
+      'supervisor-workload': (data) => {
+        let html = `<div class="report-header"><h3><i class="fas fa-chalkboard-user"></i> Supervisor Workload Report</h3><small>Generated: ${new Date(data.generatedAt).toLocaleString()}</small></div>`;
+        
+        const summary = data.summary || {};
+        html += `<div class="report-summary">
+          <div class="report-summary-item"><h4>${summary.totalSupervisors || 0}</h4><p>Supervisors</p></div>
+        </div>`;
+
+        const supervisors = data.supervisors || [];
+        if (supervisors.length) {
+          html += `<table class="report-table"><thead><tr><th>Supervisor</th><th>Email</th><th>Department</th><th>Current</th><th>Capacity</th><th>Utilization</th></tr></thead><tbody>`;
+          supervisors.forEach(s => {
+            const pct = s.utilization || 0;
+            const color = pct > 80 ? '#ea4335' : pct > 50 ? '#fbbc04' : '#34a853';
+            html += `<tr><td><strong>${s.supervisor}</strong></td><td>${s.email}</td><td>${s.department}</td><td>${s.currentAttachees}</td><td>${s.capacity}</td><td><span style="color:${color};font-weight:600;">${pct}%</span></td></tr>`;
+          });
+          html += `</tbody></table>`;
+        }
+        return html;
+      }
+    };
+
+    const reportFns = {
+      'active-attachees': () => API.getActiveAttacheesReport(),
+      'attendance': () => API.getAttendanceReport({ 
+        startDate: new Date(Date.now() - 30*24*60*60*1000).toISOString().split('T')[0], 
+        endDate: new Date().toISOString().split('T')[0] 
+      }),
+      'evaluations': () => API.getEvaluationReport(),
+      'departmental-placement': () => API.getDepartmentalPlacementReport(),
+      'completion': () => API.getCompletionReport(),
+      'supervisor-workload': () => API.getSupervisorWorkloadReport(),
+    };
+
+    async function generateReport(type) {
+      try {
+        const output = document.getElementById('reportOutput');
+        output.innerHTML = '<div class="loading-spinner"></div>';
+        
+        const response = await reportFns[type]();
+        const data = response.data;
+        
+        // Use the renderer if available
+        if (renderers[type]) {
+          output.innerHTML = renderers[type](data);
+        } else {
+          output.innerHTML = `<div class="alert alert-info">Data received but no formatter available</div>`;
+        }
+
+        // Show print button
+        document.getElementById('printBtn').style.display = 'block';
+
+      } catch (error) {
+        document.getElementById('reportOutput').innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+      }
+    }
+  </script>
+</body>
+</html>

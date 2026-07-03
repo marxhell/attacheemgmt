@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Logbook - Attachee Management System</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="../assets/css/styles.css">
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand"><i class="fas fa-user-graduate"></i><h2>Student Portal</h2><small>Kisii County - Water & Energy</small></div>
+      <nav class="sidebar-nav">
+        <div class="nav-section">Main</div>
+        <a href="student-dashboard.html"><i class="fas fa-chart-pie"></i> My Dashboard</a>
+        <div class="nav-section">My Activities</div>
+        <a href="student-attendance.html"><i class="fas fa-clipboard-check"></i> My Attendance</a>
+        <a href="student-logbook.html" class="active"><i class="fas fa-book"></i> My Logbook</a>
+        <a href="student-evaluations.html"><i class="fas fa-star"></i> My Evaluations</a>
+        <div class="nav-section">Account</div>
+        <a href="student-profile.html"><i class="fas fa-user-circle"></i> My Profile</a>
+        <a href="#" onclick="Auth.logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+      </nav>
+    </aside>
+    <main class="main-content">
+      <header class="header">
+        <div class="header-left"><button class="toggle-sidebar" onclick="document.getElementById('sidebar').classList.toggle('open')"><i class="fas fa-bars"></i></button><h1>My Logbook</h1></div>
+        <div class="header-right"><div class="user-info"><div class="user-avatar" id="userAvatar">S</div><div><div class="user-name" id="userName">Student</div><div class="user-role" id="userRole">Attachee</div></div></div></div>
+      </header>
+      <div class="page-content">
+        <div class="page-header">
+          <h2>Logbook Entries</h2>
+          <div class="header-actions"><button class="btn btn-primary" onclick="openModal('logbookModal')"><i class="fas fa-plus"></i> New Entry</button></div>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <div class="table-container">
+              <table>
+                <thead><tr><th>Week</th><th>Date</th><th>Activities</th><th>Skills</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody id="logbookBody"><tr><td colspan="6" class="text-center">Loading...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="logbookModal">
+    <div class="modal">
+      <div class="modal-header"><h3>New Logbook Entry</h3><button class="modal-close" onclick="closeModal('logbookModal')">&times;</button></div>
+      <div class="modal-body">
+        <form id="logbookForm">
+          <div class="form-row">
+            <div class="form-group"><label>Week Number *</label><input type="number" id="weekNumber" class="form-control" min="1" required></div>
+            <div class="form-group"><label>Date</label><input type="date" id="lbDate" class="form-control"></div>
+          </div>
+          <div class="form-group"><label>Activities Performed *</label><textarea id="activities" class="form-control" rows="3" required></textarea></div>
+          <div class="form-group"><label>Skills Acquired</label><textarea id="skillsAcquired" class="form-control" rows="2"></textarea></div>
+          <div class="form-group"><label>Lessons Learned</label><textarea id="lessonsLearned" class="form-control" rows="2"></textarea></div>
+          <div class="form-group"><label>Challenges Faced</label><textarea id="challenges" class="form-control" rows="2"></textarea></div>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Entry</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  <script>
+    let currentAttacheeId = null;
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!Auth.isLoggedIn()) { window.location.href = 'login.html'; return; }
+      Auth.updateHeaderUser();
+      const user = Auth.getUser();
+      if (!user) return;
+      try {
+        const attRes = await API.getAttachees({ search: user.email });
+        const attachees = attRes.data || [];
+        if (attachees.length > 0) currentAttacheeId = attachees[0]._id;
+        loadLogbook();
+      } catch(e) { console.error(e); }
+    });
+
+    async function loadLogbook() {
+      try {
+        if (!currentAttacheeId) { document.getElementById('logbookBody').innerHTML = '<tr><td colspan="6" class="text-center">No attachment record found</td></tr>'; return; }
+        const response = await API.getLogbookEntries({ attachee: currentAttacheeId });
+        const entries = response.data || [];
+        const tbody = document.getElementById('logbookBody');
+        if (entries.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="text-center">No logbook entries yet. Create your first entry!</td></tr>'; return; }
+        tbody.innerHTML = entries.map(e => `
+          <tr>
+            <td>Week ${e.weekNumber}</td>
+            <td>${new Date(e.date).toLocaleDateString()}</td>
+            <td>${(e.activities || '').substring(0, 60)}...</td>
+            <td>${e.skillsAcquired ? (e.skillsAcquired.substring(0, 40) + '...') : '-'}</td>
+            <td><span class="badge badge-${e.status === 'approved' ? 'success' : e.status === 'submitted' ? 'info' : 'warning'}">${e.status}</span></td>
+            <td>${e.status === 'draft' ? `<button class="btn btn-sm btn-primary" onclick="submitEntry('${e._id}')"><i class="fas fa-paper-plane"></i></button>` : '-'}</td>
+          </tr>
+        `).join('');
+      } catch(e) { console.error(e); }
+    }
+
+    async function submitEntry(id) {
+      try { await API.submitLogbookEntry(id); loadLogbook(); alert('Submitted for review!'); } catch(e) { alert(e.message); }
+    }
+
+    document.getElementById('logbookForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!currentAttacheeId) { alert('No attachment record found'); return; }
+      const data = {
+        attachee: currentAttacheeId,
+        weekNumber: parseInt(document.getElementById('weekNumber').value),
+        date: document.getElementById('lbDate').value || new Date().toISOString().split('T')[0],
+        activities: document.getElementById('activities').value,
+        skillsAcquired: document.getElementById('skillsAcquired').value,
+        lessonsLearned: document.getElementById('lessonsLearned').value,
+        challenges: document.getElementById('challenges').value,
+      };
+      try {
+        await API.createLogbookEntry(data);
+        closeModal('logbookModal');
+        loadLogbook();
+        e.target.reset();
+        alert('Logbook entry created!');
+      } catch(error) { alert(error.message); }
+    });
+  </script>
+</body>
+</html>
