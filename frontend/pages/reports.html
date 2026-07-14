@@ -34,8 +34,6 @@
         <a href="register-attachee.html"><i class="fas fa-user-plus"></i> Register Attachee</a>
         <a href="supervisors.html"><i class="fas fa-chalkboard-user"></i> Supervisors</a>
         <a href="departments.html"><i class="fas fa-building"></i> Departments</a>
-        <div class="nav-section">Tracking</div>
-        <a href="evaluations.html"><i class="fas fa-star"></i> Evaluations</a>
         <div class="nav-section">Reports</div>
         <a href="reports.html" class="active"><i class="fas fa-file-alt"></i> Reports</a>
         <div class="nav-section">Account</div>
@@ -54,14 +52,6 @@
           <div class="stat-card" onclick="generateReport('active-attachees')" style="cursor:pointer;">
             <div class="stat-icon green"><i class="fas fa-users"></i></div>
             <div class="stat-info"><h3>Active Attachees</h3><p>Currently active attachees</p></div>
-          </div>
-          <div class="stat-card" onclick="generateReport('attendance')" style="cursor:pointer;">
-            <div class="stat-icon blue"><i class="fas fa-clipboard-check"></i></div>
-            <div class="stat-info"><h3>Attendance Record</h3><p>Attendance by date range</p></div>
-          </div>
-          <div class="stat-card" onclick="generateReport('evaluations')" style="cursor:pointer;">
-            <div class="stat-icon yellow"><i class="fas fa-star"></i></div>
-            <div class="stat-info"><h3>Evaluation Summary</h3><p>Performance scores & grades</p></div>
           </div>
           <div class="stat-card" onclick="generateReport('departmental-placement')" style="cursor:pointer;">
             <div class="stat-icon blue"><i class="fas fa-building"></i></div>
@@ -118,57 +108,6 @@
           html += `<h4 class="mt-2">Attachee List</h4><table class="report-table"><thead><tr><th>Name</th><th>Institution</th><th>Course</th><th>Department</th><th>Supervisor</th><th>Start Date</th><th>End Date</th></tr></thead><tbody>`;
           list.forEach(a => {
             html += `<tr><td>${a.firstName} ${a.lastName}</td><td>${a.institution}</td><td>${a.course}</td><td>${a.department?.name || '-'}</td><td>${a.supervisor?.name || '-'}</td><td>${new Date(a.attachmentStartDate).toLocaleDateString()}</td><td>${new Date(a.attachmentEndDate).toLocaleDateString()}</td></tr>`;
-          });
-          html += `</tbody></table>`;
-        }
-        return html;
-      },
-
-      'attendance': (data) => {
-        const summary = data.summary || {};
-        let html = `<div class="report-header"><h3><i class="fas fa-clipboard-check"></i> Attendance Report</h3><small>Generated: ${new Date(data.generatedAt).toLocaleString()}</small></div>`;
-        
-        html += `<div class="report-summary">
-          <div class="report-summary-item"><h4>${summary.total || 0}</h4><p>Total Records</p></div>
-          <div class="report-summary-item" style="background:#e6f4ea;"><h4>${summary.present || 0}</h4><p>Present</p></div>
-          <div class="report-summary-item" style="background:#fce8e6;"><h4>${summary.absent || 0}</h4><p>Absent</p></div>
-          <div class="report-summary-item" style="background:#fef7e0;"><h4>${summary.late || 0}</h4><p>Late</p></div>
-        </div>`;
-
-        const records = data.records || [];
-        if (records.length) {
-          html += `<table class="report-table"><thead><tr><th>Attachee</th><th>Date</th><th>Check In</th><th>Check Out</th><th>Status</th></tr></thead><tbody>`;
-          records.slice(0, 50).forEach(r => {
-            html += `<tr><td>${r.attachee ? r.attachee.firstName + ' ' + r.attachee.lastName : 'N/A'}</td><td>${new Date(r.date).toLocaleDateString()}</td><td>${new Date(r.checkIn).toLocaleTimeString()}</td><td>${r.checkOut ? new Date(r.checkOut).toLocaleTimeString() : '-'}</td><td><span class="badge badge-${r.status === 'present' ? 'success' : r.status === 'absent' ? 'danger' : 'warning'}">${r.status}</span></td></tr>`;
-          });
-          html += `</tbody></table>`;
-          if (records.length > 50) html += `<p class="text-center" style="color:#666;">Showing 50 of ${records.length} records</p>`;
-        }
-        return html;
-      },
-
-      'evaluations': (data) => {
-        const summary = data.summary || {};
-        let html = `<div class="report-header"><h3><i class="fas fa-star"></i> Evaluation Report</h3><small>Generated: ${new Date(data.generatedAt).toLocaleString()}</small></div>`;
-        
-        html += `<div class="report-summary">
-          <div class="report-summary-item"><h4>${summary.total || 0}</h4><p>Total Evaluations</p></div>
-          <div class="report-summary-item" style="background:#e6f4ea;"><h4>${summary.averageScore || 'N/A'}</h4><p>Average Score /5</p></div>
-        </div>`;
-
-        if (summary.byGrade) {
-          html += `<h4>Grade Distribution</h4><table class="report-table"><thead><tr><th>Grade</th><th>Count</th></tr></thead><tbody>`;
-          Object.entries(summary.byGrade).forEach(([grade, count]) => {
-            html += `<tr><td><strong>${grade}</strong></td><td>${count}</td></tr>`;
-          });
-          html += `</tbody></table>`;
-        }
-
-        const evals = data.evaluations || [];
-        if (evals.length) {
-          html += `<h4 class="mt-2">Evaluation Details</h4><table class="report-table"><thead><tr><th>Attachee</th><th>Type</th><th>Score</th><th>Grade</th></tr></thead><tbody>`;
-          evals.forEach(e => {
-            html += `<tr><td>${e.attachee ? e.attachee.firstName + ' ' + e.attachee.lastName : 'N/A'}</td><td><span class="badge badge-info">${e.evaluationType}</span></td><td><strong>${e.averageScore || '-'}/5.0</strong></td><td><h3 style="margin:0;">${e.grade || '-'}</h3></td></tr>`;
           });
           html += `</tbody></table>`;
         }
@@ -248,11 +187,6 @@
 
     const reportFns = {
       'active-attachees': () => API.getActiveAttacheesReport(),
-      'attendance': () => API.getAttendanceReport({ 
-        startDate: new Date(Date.now() - 30*24*60*60*1000).toISOString().split('T')[0], 
-        endDate: new Date().toISOString().split('T')[0] 
-      }),
-      'evaluations': () => API.getEvaluationReport(),
       'departmental-placement': () => API.getDepartmentalPlacementReport(),
       'completion': () => API.getCompletionReport(),
       'supervisor-workload': () => API.getSupervisorWorkloadReport(),

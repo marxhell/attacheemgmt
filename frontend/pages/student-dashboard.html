@@ -9,200 +9,68 @@
 </head>
 <body>
   <div class="app-layout">
-    <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
-      <div class="sidebar-brand">
-        <i class="fas fa-user-graduate"></i>
-        <h2>Student Portal</h2>
-        <small>Kisii County - Water & Energy</small>
-      </div>
+      <div class="sidebar-brand"><i class="fas fa-user-graduate"></i><h2>Student Portal</h2><small>Kisii County - Water & Energy</small></div>
       <nav class="sidebar-nav">
         <div class="nav-section">Main</div>
         <a href="student-dashboard.html" class="active"><i class="fas fa-chart-pie"></i> My Dashboard</a>
-        <div class="nav-section">My Activities</div>
-        <a href="student-evaluations.html"><i class="fas fa-star"></i> My Evaluations</a>
         <div class="nav-section">Account</div>
         <a href="student-profile.html"><i class="fas fa-user-circle"></i> My Profile</a>
         <a href="#" onclick="Auth.logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
       </nav>
     </aside>
-
-    <!-- Main Content -->
     <main class="main-content">
       <header class="header">
-        <div class="header-left">
-          <button class="toggle-sidebar" onclick="document.getElementById('sidebar').classList.toggle('open')">
-            <i class="fas fa-bars"></i>
-          </button>
-          <h1>My Dashboard</h1>
-        </div>
-        <div class="header-right">
-          <div class="user-info" onclick="window.location.href='student-profile.html'">
-            <div class="user-avatar" id="userAvatar">S</div>
-            <div>
-              <div class="user-name" id="userName">Student</div>
-              <div class="user-role" id="userRole">Attachee</div>
-            </div>
-          </div>
-        </div>
+        <div class="header-left"><button class="toggle-sidebar" onclick="document.getElementById('sidebar').classList.toggle('open')"><i class="fas fa-bars"></i></button><h1>My Dashboard</h1></div>
+        <div class="header-right"><div class="user-info" onclick="window.location.href='student-profile.html'"><div class="user-avatar" id="userAvatar">S</div><div><div class="user-name" id="userName">Student</div><div class="user-role" id="userRole">Attachee</div></div></div></div>
       </header>
-
       <div class="page-content">
-        <!-- Status Cards -->
         <div class="stats-grid">
           <div class="stat-card">
             <div class="stat-icon blue"><i class="fas fa-info-circle"></i></div>
-            <div class="stat-info">
-              <h3 id="attachmentStatus">Pending</h3>
-              <p>Attachment Status</p>
-            </div>
+            <div class="stat-info"><h3 id="attachmentStatus">Pending</h3><p>Attachment Status</p></div>
           </div>
           <div class="stat-card">
             <div class="stat-icon green"><i class="fas fa-calendar-check"></i></div>
-            <div class="stat-info">
-              <h3 id="daysRemaining">-</h3>
-              <p>Days Remaining</p>
-            </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon blue"><i class="fas fa-clipboard-check"></i></div>
-            <div class="stat-info">
-              <h3 id="attendanceCount">0</h3>
-              <p>Attendance Records</p>
-            </div>
+            <div class="stat-info"><h3 id="daysRemaining">-</h3><p>Days Remaining</p></div>
           </div>
           <div class="stat-card">
             <div class="stat-icon yellow"><i class="fas fa-star"></i></div>
-            <div class="stat-info">
-              <h3 id="evaluationCount">0</h3>
-              <p>Evaluations</p>
-            </div>
+            <div class="stat-info"><h3 id="evaluationCount">0</h3><p>Evaluations</p></div>
           </div>
         </div>
-
         <div class="card">
-          <div class="card-header">
-            <h3>My Attachment Details</h3>
-          </div>
-          <div class="card-body" id="attachmentDetails">
-            <div class="loading-spinner"></div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-header">
-            <h3>My Recent Logbook Entries</h3>
-            <a href="student-logbook.html" class="btn btn-sm btn-primary">Manage Logbook</a>
-          </div>
-          <div class="card-body">
-            <div class="table-container">
-              <table>
-                <thead>
-                  <tr><th>Week</th><th>Date</th><th>Activities</th><th>Status</th></tr>
-                </thead>
-                <tbody id="recentLogbook">
-                  <tr><td colspan="4" class="text-center">Loading...</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <div class="card-header"><h3>My Attachment Details</h3></div>
+          <div class="card-body" id="attachmentDetails"><div class="loading-spinner"></div></div>
         </div>
       </div>
     </main>
   </div>
-
   <script src="../assets/js/api.js"></script>
   <script src="../assets/js/auth.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
-      if (!Auth.isLoggedIn()) {
-        window.location.href = 'login.html';
-        return;
-      }
+      if (!Auth.isLoggedIn()) { window.location.href = 'login.html'; return; }
       Auth.updateHeaderUser();
-
       const user = Auth.getUser();
       if (!user) return;
-
       try {
-        // Get all attachees matching this user's email
         const attacheeRes = await API.getAttachees({ search: user.email });
         const attachees = attacheeRes.data || [];
         const attachee = attachees.length > 0 ? attachees[0] : null;
-
         if (attachee) {
-          document.getElementById('attachmentStatus').textContent = 
-            attachee.status.charAt(0).toUpperCase() + attachee.status.slice(1);
-          document.getElementById('attachmentStatus').className = 
-            `badge badge-${attachee.status === 'active' ? 'success' : attachee.status === 'pending' ? 'warning' : 'info'}`;
-
-          // Days remaining
+          document.getElementById('attachmentStatus').textContent = attachee.status.charAt(0).toUpperCase() + attachee.status.slice(1);
+          document.getElementById('attachmentStatus').className = 'badge badge-' + (attachee.status === 'active' ? 'success' : attachee.status === 'pending' ? 'warning' : 'info');
           if (attachee.attachmentEndDate) {
-            const end = new Date(attachee.attachmentEndDate);
-            const now = new Date();
-            const days = Math.ceil((end - now) / (1000 * 60 * 60 * 24));
+            const days = Math.ceil((new Date(attachee.attachmentEndDate) - new Date()) / (1000*60*60*24));
             document.getElementById('daysRemaining').textContent = days > 0 ? days : 0;
           }
-
-          document.getElementById('attachmentDetails').innerHTML = `
-            <div class="form-row">
-              <div><strong>Name:</strong> ${attachee.firstName} ${attachee.lastName}</div>
-              <div><strong>Student ID:</strong> ${attachee.studentId}</div>
-              <div><strong>Institution:</strong> ${attachee.institution}</div>
-            </div>
-            <div class="form-row">
-              <div><strong>Course:</strong> ${attachee.course}</div>
-              <div><strong>Department:</strong> ${attachee.department ? attachee.department.name : 'Not assigned'}</div>
-              <div><strong>Supervisor:</strong> ${attachee.supervisor ? attachee.supervisor.name : 'Not assigned'}</div>
-            </div>
-            <div class="form-row">
-              <div><strong>Start Date:</strong> ${new Date(attachee.attachmentStartDate).toLocaleDateString()}</div>
-              <div><strong>End Date:</strong> ${new Date(attachee.attachmentEndDate).toLocaleDateString()}</div>
-              <div><strong>Duration:</strong> ${attachee.duration || '-'} weeks</div>
-            </div>
-          `;
-
-          // Attendance count
-          try {
-            const attSummary = await API.getAttacheeAttendanceSummary(attachee._id);
-            document.getElementById('attendanceCount').textContent = attSummary.data?.total || 0;
-          } catch(e) {}
-
-          // Evaluation count
-          try {
-            const evalRes = await API.getEvaluations({ attachee: attachee._id });
-            document.getElementById('evaluationCount').textContent = evalRes.data?.length || 0;
-          } catch(e) {}
-
-          // Logbook entries
-          try {
-            const logRes = await API.getLogbookEntries({ attachee: attachee._id, limit: 5 });
-            const entries = logRes.data || [];
-            const tbody = document.getElementById('recentLogbook');
-            if (entries.length === 0) {
-              tbody.innerHTML = '<tr><td colspan="4" class="text-center">No logbook entries yet</td></tr>';
-            } else {
-              tbody.innerHTML = entries.map(e => `
-                <tr>
-                  <td>Week ${e.weekNumber}</td>
-                  <td>${new Date(e.date).toLocaleDateString()}</td>
-                  <td>${(e.activities || '').substring(0, 50)}...</td>
-                  <td><span class="badge badge-${e.status === 'approved' ? 'success' : e.status === 'submitted' ? 'info' : 'warning'}">${e.status}</span></td>
-                </tr>
-              `).join('');
-            }
-          } catch(e) {}
+          document.getElementById('attachmentDetails').innerHTML = '<div class="form-row"><div><strong>Name:</strong> ' + attachee.firstName + ' ' + attachee.lastName + '</div><div><strong>Student ID:</strong> ' + attachee.studentId + '</div><div><strong>Institution:</strong> ' + attachee.institution + '</div></div><div class="form-row"><div><strong>Course:</strong> ' + attachee.course + '</div><div><strong>Department:</strong> ' + (attachee.department ? attachee.department.name : 'Not assigned') + '</div><div><strong>Supervisor:</strong> ' + (attachee.supervisor ? attachee.supervisor.name : 'Not assigned') + '</div></div><div class="form-row"><div><strong>Start Date:</strong> ' + new Date(attachee.attachmentStartDate).toLocaleDateString() + '</div><div><strong>End Date:</strong> ' + new Date(attachee.attachmentEndDate).toLocaleDateString() + '</div><div><strong>Duration:</strong> ' + (attachee.duration || '-') + ' weeks</div></div>';
+          document.getElementById('evaluationCount').textContent = '0';
         } else {
-          document.getElementById('attachmentDetails').innerHTML = `
-            <div class="empty-state">
-              <i class="fas fa-user-plus"></i>
-              <h3>No attachment record found</h3>
-              <p>Please contact the department HR.</p>
-            </div>
-          `;
+          document.getElementById('attachmentDetails').innerHTML = '<div class="empty-state"><i class="fas fa-user-plus"></i><h3>No attachment record found</h3><p>Please contact the department HR.</p></div>';
         }
       } catch(error) {
-        console.error('Error loading student dashboard:', error);
         document.getElementById('attachmentDetails').innerHTML = '<div class="alert alert-danger">Error loading data</div>';
       }
     });

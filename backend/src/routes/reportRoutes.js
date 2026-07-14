@@ -5,8 +5,6 @@ const { authorize } = require('../middleware/roleMiddleware');
 
 const {
   activeAttacheesReport,
-  attendanceReport,
-  evaluationReport,
   departmentalPlacementReport,
   completionReport,
   supervisorWorkloadReport,
@@ -14,8 +12,6 @@ const {
 } = require('../controllers/reportController');
 
 router.get('/active-attachees', protect, activeAttacheesReport);
-router.get('/attendance', protect, attendanceReport);
-router.get('/evaluations', protect, evaluationReport);
 router.get('/departmental-placement', protect, departmentalPlacementReport);
 router.get('/completion', protect, completionReport);
 router.get('/supervisor-workload', protect, authorize('admin', 'hr', 'director'), supervisorWorkloadReport);

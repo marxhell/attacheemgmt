@@ -1,7 +1,4 @@
 const Attachee = require('../models/Attachee');
-const Attendance = require('../models/Attendance');
-const Evaluation = require('../models/Evaluation');
-const Logbook = require('../models/Logbook');
 const Department = require('../models/Department');
 const Supervisor = require('../models/Supervisor');
 const ResponseHandler = require('../utils/responseHandler');
@@ -32,77 +29,6 @@ exports.activeAttacheesReport = async (req, res, next) => {
       summary,
       attachees,
     }, 'Active attachees report generated');
-  } catch (error) {
-    next(error);
-  }
-};
-
-// @desc    Generate attendance report
-// @route   GET /api/reports/attendance
-// @access  Private
-exports.attendanceReport = async (req, res, next) => {
-  try {
-    const { startDate, endDate } = req.query;
-    const query = {};
-
-    if (startDate && endDate) {
-      query.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
-    }
-
-    const records = await Attendance.find(query)
-      .populate('attachee', 'firstName lastName studentId institution department')
-      .sort({ date: -1 });
-
-    const summary = {
-      total: records.length,
-      present: records.filter(r => r.status === 'present').length,
-      absent: records.filter(r => r.status === 'absent').length,
-      late: records.filter(r => r.status === 'late').length,
-      halfDay: records.filter(r => r.status === 'half-day').length,
-      permission: records.filter(r => r.status === 'permission').length,
-    };
-
-    return ResponseHandler.success(res, {
-      reportType: 'Attendance Report',
-      generatedAt: new Date(),
-      dateRange: { startDate, endDate },
-      summary,
-      records,
-    }, 'Attendance report generated');
-  } catch (error) {
-    next(error);
-  }
-};
-
-// @desc    Generate evaluation report
-// @route   GET /api/reports/evaluations
-// @access  Private
-exports.evaluationReport = async (req, res, next) => {
-  try {
-    const evaluations = await Evaluation.find()
-      .populate('attachee', 'firstName lastName studentId institution')
-      .populate('supervisor', 'name')
-      .sort({ createdAt: -1 });
-
-    const summary = {
-      total: evaluations.length,
-      byGrade: {},
-      averageScore: 0,
-    };
-
-    let totalScore = 0;
-    evaluations.forEach(e => {
-      summary.byGrade[e.grade] = (summary.byGrade[e.grade] || 0) + 1;
-      totalScore += e.averageScore || 0;
-    });
-    summary.averageScore = evaluations.length > 0 ? (totalScore / evaluations.length).toFixed(2) : 0;
-
-    return ResponseHandler.success(res, {
-      reportType: 'Evaluation Report',
-      generatedAt: new Date(),
-      summary,
-      evaluations,
-    }, 'Evaluation report generated');
   } catch (error) {
     next(error);
   }
@@ -221,25 +147,8 @@ exports.attacheeFullReport = async (req, res, next) => {
 
     if (!attachee) return ResponseHandler.notFound(res, 'Attachee not found');
 
-    const attendance = await Attendance.find({ attachee: req.params.id }).sort({ date: -1 });
-    const evaluations = await Evaluation.find({ attachee: req.params.id })
-      .populate('supervisor', 'name')
-      .sort({ createdAt: -1 });
-    const logbook = await Logbook.find({ attachee: req.params.id })
-      .sort({ weekNumber: 1 });
-
-    const attendanceSummary = {
-      total: attendance.length,
-      present: attendance.filter(a => a.status === 'present').length,
-      absent: attendance.filter(a => a.status === 'absent').length,
-      late: attendance.filter(a => a.status === 'late').length,
-    };
-
     return ResponseHandler.success(res, {
       attachee,
-      attendance: { summary: attendanceSummary, records: attendance },
-      evaluations,
-      logbook,
     }, 'Full attachee report generated');
   } catch (error) {
     next(error);

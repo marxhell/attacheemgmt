@@ -9,9 +9,8 @@ A comprehensive web-based system for managing industrial attachment programs wit
 
 ### 1. User Authentication & Access Control
 - Secure login/logout with JWT
-- Role-based permissions (Admin, Supervisor, HR, Director)
+- Role-based permissions (Admin, Supervisor, HR, Director, Student)
 - Password encryption using bcryptjs
-- Session management
 
 ### 2. Attachee Registration Management
 - Student profile creation with personal details
@@ -19,39 +18,34 @@ A comprehensive web-based system for managing industrial attachment programs wit
 - Attachment duration tracking
 - Document upload (Student ID, National ID, Insurance, School letter)
 - Emergency contact information
+- **Self-registration** for students with auto-login
 
 ### 3. Placement & Supervisor Assignment
 - Department allocation
 - Supervisor assignment
 - Placement tracking
-- Attachment status monitoring (pending, active, completed, terminated)
+- Attachment status monitoring (pending → active → completed)
 
-### 4. Attendance Tracking
-- Daily attendance marking
-- Check-in/check-out tracking
-- Status options (present, absent, late, half-day, permission)
-- Attendance reports and summaries
-
-### 5. Logbook Management
-- Weekly logbook entries
-- Skills acquired and lessons learned tracking
-- Supervisor review and approval workflow
-- Submission status tracking
-
-### 6. Evaluation & Assessment
+### 4. Evaluation & Assessment (Supervisor-managed)
 - 10-criteria performance evaluation (1-5 scale)
 - Automatic grade calculation (A, B, C, D, F)
 - Mid-term and final evaluations
 - Performance recommendations
 
-### 7. Reporting Module
+### 5. Reporting Module
 - Active attachees report
-- Attendance report
 - Evaluation report
 - Departmental placement report
 - Completion report
 - Supervisor workload report
 - Full attachee report
+
+### 6. Data Security
+- Password hashing (bcryptjs)
+- JWT-based authentication
+- Role-based authorization
+- Input validation
+- Rate limiting
 
 ## Tech Stack
 
@@ -97,8 +91,7 @@ attachee-management-system/
 ### Setup
 
 ```bash
-# 1. Clone the repository
-git clone <repo-url>
+# 1. Navigate to project
 cd attachee-management-system
 
 # 2. Install dependencies
@@ -106,7 +99,6 @@ npm install
 
 # 3. Start MongoDB (ensure it's running)
 # On Windows: net start MongoDB
-# Or run: mongod
 
 # 4. Seed the database with initial data
 npm run seed
@@ -118,46 +110,84 @@ npm run dev
 # Open frontend/pages/login.html via Live Server
 ```
 
+## System Workflow
+
+### Admin/HR Workflow
+1. Login as admin or HR
+2. **Approve** pending student registrations (changes status from pending → active)
+3. **Assign Department** to attachees
+4. **Assign Supervisor** to attachees
+5. **Mark Complete** when attachment period ends
+
+### Supervisor Workflow
+1. Login as supervisor
+2. View assigned attachees
+3. **Create Evaluations** for attachees (mid-term or final)
+4. Fill 10 performance criteria (1-5 scale)
+5. System auto-calculates grade and recommendation
+
+### Student Workflow
+1. Self-register at `student-register.html`
+2. Upload required documents (school letter, ID, insurance, photo)
+3. Auto-login and view dashboard
+4. Track attachment status and days remaining
+5. View evaluation results from supervisors
+
 ## Default Login Credentials
 
-| Email | Password | Role |
-|-------|----------|------|
-| admin@kisiiwater.go.ke | Admin123! | Admin |
+| Role | Email | Password |
+|------|-------|----------|
+| **Admin** | admin@kisiiwater.go.ke | Admin123! |
+| **HR** | hr@kisiiwater.go.ke | Hr123! |
+| **Director** | director@kisiiwater.go.ke | Director123! |
+| **Supervisor** | jmwangi@kisiiwater.go.ke | Supervisor123! |
+| **Supervisor** | swanjiku@kisiiwater.go.ke | Supervisor123! |
+| **Supervisor** | dochieng@kisiiwater.go.ke | Supervisor123! |
+| **Supervisor** | gakinyi@kisiiwater.go.ke | Supervisor123! |
+| **Supervisor** | pkamau@kisiiwater.go.ke | Supervisor123! |
 
 ## API Endpoints
 
 ### Authentication
 - `POST /api/auth/login` - Login
+- `POST /api/auth/student-register` - Student self-registration
 - `GET /api/auth/me` - Get profile
 - `PUT /api/auth/updatedetails` - Update profile
 - `PUT /api/auth/updatepassword` - Change password
 
 ### Attachees
-- `GET /api/attachees` - List attachees
+- `GET /api/attachees` - List attachees (with search/filter/pagination)
 - `POST /api/attachees` - Register attachee
 - `GET /api/attachees/:id` - Get attachee details
 - `PUT /api/attachees/:id` - Update attachee
 - `DELETE /api/attachees/:id` - Delete attachee
+- `PUT /api/attachees/:id/assign-department` - Assign department
+- `PUT /api/attachees/:id/assign-supervisor` - Assign supervisor
+- `PUT /api/attachees/:id/status` - Update status (approve/complete)
+- `GET /api/attachees/stats/counts` - Status statistics
 
-### Attendance
-- `GET /api/attendance` - List attendance records
-- `POST /api/attendance` - Mark attendance
+### Departments
+- `GET /api/departments` - List departments
+- `POST /api/departments` - Create department
+- `PUT /api/departments/:id` - Update department
+- `DELETE /api/departments/:id` - Delete department
+
+### Supervisors
+- `GET /api/supervisors` - List supervisors
+- `POST /api/supervisors` - Create supervisor
 
 ### Evaluations
 - `GET /api/evaluations` - List evaluations
 - `POST /api/evaluations` - Create evaluation
 
-### Logbook
-- `GET /api/logbook` - List logbook entries
-- `POST /api/logbook` - Create entry
-
 ### Reports
-- `GET /api/reports/active-attachees` - Active attachees
-- `GET /api/reports/attendance` - Attendance report
+- `GET /api/reports/active-attachees` - Active attachees report
 - `GET /api/reports/evaluations` - Evaluation report
 - `GET /api/reports/departmental-placement` - Department placement
 - `GET /api/reports/completion` - Completion report
+- `GET /api/reports/supervisor-workload` - Supervisor workload
+- `GET /api/reports/attachee/:id` - Full attachee report
 
 ## License
 
-MIT - Department of Water, Energy, Environment and Natural Resources, Kisii County Government# attacheemgmt
+MIT - Department of Water, Energy, Environment and Natural Resources, Kisii County Government

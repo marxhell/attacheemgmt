@@ -32,21 +32,6 @@ exports.attendanceValidator = [
   body('status').optional().isIn(['present', 'absent', 'late', 'half-day', 'permission']),
 ];
 
-exports.evaluationValidator = [
-  body('attachee').isMongoId().withMessage('Valid attachee ID is required'),
-  body('evaluationType').isIn(['mid-term', 'final']).withMessage('Evaluation type must be mid-term or final'),
-  body('punctuality').isInt({ min: 1, max: 5 }).withMessage('Punctuality must be 1-5'),
-  body('attendance').isInt({ min: 1, max: 5 }).withMessage('Attendance must be 1-5'),
-  body('attitude').isInt({ min: 1, max: 5 }).withMessage('Attitude must be 1-5'),
-  body('initiative').isInt({ min: 1, max: 5 }).withMessage('Initiative must be 1-5'),
-  body('qualityOfWork').isInt({ min: 1, max: 5 }).withMessage('Quality of work must be 1-5'),
-  body('technicalSkills').isInt({ min: 1, max: 5 }).withMessage('Technical skills must be 1-5'),
-  body('communication').isInt({ min: 1, max: 5 }).withMessage('Communication must be 1-5'),
-  body('teamwork').isInt({ min: 1, max: 5 }).withMessage('Teamwork must be 1-5'),
-  body('problemSolving').isInt({ min: 1, max: 5 }).withMessage('Problem solving must be 1-5'),
-  body('adaptability').isInt({ min: 1, max: 5 }).withMessage('Adaptability must be 1-5'),
-];
-
 exports.departmentValidator = [
   body('name').trim().notEmpty().withMessage('Department name is required'),
   body('code').trim().notEmpty().withMessage('Department code is required'),

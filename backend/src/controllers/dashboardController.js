@@ -1,5 +1,4 @@
 const Attachee = require('../models/Attachee');
-const Evaluation = require('../models/Evaluation');
 const Supervisor = require('../models/Supervisor');
 const Department = require('../models/Department');
 const ResponseHandler = require('../utils/responseHandler');
@@ -16,8 +15,6 @@ exports.getStats = async (req, res, next) => {
     
     const totalSupervisors = await Supervisor.countDocuments({ isActive: true });
     const totalDepartments = await Department.countDocuments({ isActive: true });
-
-    const pendingEvaluations = await Evaluation.countDocuments({ status: 'draft' });
 
     // Get attachees nearing completion (within 2 weeks)
     const twoWeeksFromNow = new Date();
@@ -40,7 +37,6 @@ exports.getStats = async (req, res, next) => {
       pendingAttachees,
       totalSupervisors,
       totalDepartments,
-      pendingEvaluations,
       nearingCompletion,
       overdueAttachees,
     }, 'Dashboard stats retrieved');
