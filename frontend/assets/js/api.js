@@ -1,12 +1,13 @@
-// API Configuration - detects frontend host to determine API URL
+// API Configuration - detects environment to determine API URL
 function getApiBaseUrl() {
-  const hostname = window.location.hostname;
-  if (hostname === '127.0.0.1' || hostname === 'localhost') {
-    return 'http://localhost:5000/api';
+  // In production (Netlify), use the Render backend URL
+  if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return 'https://attachee-management-api.onrender.com/api';
   }
-  // In production, API might be on same server
-  return '/api';
+  // Local development
+  return 'http://localhost:5000/api';
 }
+
 const API_BASE_URL = getApiBaseUrl();
 
 // Get auth token

@@ -9,24 +9,27 @@ const errorHandler = require('./middleware/errorMiddleware');
 
 const app = express();
 
-// Security middleware - Disable CSP entirely for dev (frontend served separately)
+// Security middleware
 app.use(helmet({
   contentSecurityPolicy: false,
   crossOriginEmbedderPolicy: false,
   crossOriginResourcePolicy: { policy: "cross-origin" },
 }));
+
+// CORS - allow all origins in production for Netlify frontend
+const allowedOrigins = [
+  'http://localhost:5500',
+  'http://127.0.0.1:5500',
+  'http://localhost:3000',
+  'http://localhost:5000',
+  'https://attacheemgmt.netlify.app',
+  'https://attachee-management-api.onrender.com',
+  process.env.FRONTEND_URL,
+].filter(Boolean);
+
 app.use(cors({
   origin: function (origin, callback) {
-    const allowedOrigins = [
-      'http://localhost:5500',
-      'http://127.0.0.1:5500',
-      'http://localhost:3000',
-      'http://localhost:5000',
-      process.env.FRONTEND_URL,
-    ].filter(Boolean);
-    
-    // Allow requests with no origin (mobile apps, curl, etc.)
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'production') {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
@@ -37,7 +40,7 @@ app.use(cors({
 
 // Rate limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000,
   max: 100,
   message: {
     success: false,
@@ -53,7 +56,7 @@ app.use(express.urlencoded({ extended: true }));
 // Data sanitization against NoSQL injection
 app.use(mongoSanitize());
 
-// Logging in development
+// Logging
 if (process.env.NODE_ENV !== 'production') {
   app.use(morgan('dev'));
 }
@@ -98,7 +101,7 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-// Error handler (must be last middleware)
+// Error handler
 app.use(errorHandler);
 
 // 404 handler
