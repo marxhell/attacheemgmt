@@ -4,7 +4,7 @@
 
 [[redirects]]
   from = "/api/*"
-  to = "https://attachee-management-api.onrender.com/api/:splat"
+  to = "https://attacheemgmt.onrender.com/api/:splat"
   status = 200
 
 [[redirects]]
