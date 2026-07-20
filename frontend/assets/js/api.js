@@ -2,7 +2,7 @@
 function getApiBaseUrl() {
   // In production (Netlify), use the Render backend URL
   if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-    return 'https://attachee-management-api.onrender.com/api';
+    return 'https://attacheemgmt.onrender.com/api';
   }
   // Local development
   return 'http://localhost:5000/api';

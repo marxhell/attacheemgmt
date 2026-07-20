@@ -22,8 +22,8 @@ const allowedOrigins = [
   'http://127.0.0.1:5500',
   'http://localhost:3000',
   'http://localhost:5000',
-  'https://attacheemgmt.netlify.app',
-  'https://attachee-management-api.onrender.com',
+  'https://attachee-management.netlify.app',
+  'https://attacheemgmt.onrender.com',
   process.env.FRONTEND_URL,
 ].filter(Boolean);
 
